@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">TestAPP</string>
+    <string name="main_textview">Bienvenue dans TopQuiz. Quel est votre prénom ?</string>
+    <string name="main_textview_success">Merci !</string>
+    <string name="main_textedit">Veuillez entrez votre nom</string>
+    <string name="main_button">Commencer</string>
+</resources>
