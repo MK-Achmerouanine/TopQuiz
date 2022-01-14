@@ -1,5 +1,6 @@
 package orange.odc.testapp;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -19,8 +20,14 @@ import orange.odc.testapp.model.User;
 
 public class MainActivity extends AppCompatActivity {
     private TextView messageTextView;
+    private EditText inputNameEditText;
     private Button mainButton;
     private User modelUser;
+
+    private static final  int REQUEST_GAME_ACTIVITY_REQUEST_CODE = 42;
+    private static final  String SHARED_PREF_USER_INFO = "SHARED_PREF_USER_INFO";
+    private static final  String SHARED_PREF_USER_INFO_NAME = "SHARED_PREF_USER_INFO_NAME";
+    private static final  String SHARED_PREF_USER_INFO_SCORE = "SHARED_PREF_USER_INFO_SCORE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         modelUser = new User("");
 
         messageTextView = findViewById(R.id.main_textview_greeting);
-        EditText inputNameEditText = findViewById(R.id.main_edittext_name);
+        inputNameEditText = findViewById(R.id.main_edittext_name);
         mainButton = findViewById(R.id.main_button_start);
         String t = messageTextView.getText().toString();
         // Désactiver le boutton
@@ -52,9 +59,9 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable editable) {
                 if (!editable.toString().isEmpty()) {
                     mainButton.setEnabled(true);
-                    messageTextView.setText(R.string.main_textview_success);
+                    //messageTextView.setText(R.string.main_textview_success);
                 } else {
-                    messageTextView.setText(t);
+                    //messageTextView.setText(t);
                     mainButton.setEnabled(false);
                 }
             }
@@ -65,10 +72,46 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 // Modifier le nom du User
                 modelUser.setNomComplet(inputNameEditText.getText().toString());
+                getSharedPreferences(SHARED_PREF_USER_INFO, MODE_PRIVATE)
+                        .edit()
+                        .putString(SHARED_PREF_USER_INFO_NAME, modelUser.getNomComplet())
+                        .apply();
                 // Quand on click sur le boutton
                 Intent gameActivityIntent = new Intent(MainActivity.this, GameActivity.class);
-                startActivity(gameActivityIntent);
+                //startActivity(gameActivityIntent);
+                startActivityForResult(gameActivityIntent, REQUEST_GAME_ACTIVITY_REQUEST_CODE);
             }
         });
+        greetUser();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        boolean check = REQUEST_GAME_ACTIVITY_REQUEST_CODE == requestCode && RESULT_OK == resultCode && data != null;
+        if(check){
+            int score = data.getIntExtra(GameActivity.BUNDLE_EXTRA_SCORE, 0);
+            getSharedPreferences(SHARED_PREF_USER_INFO, MODE_PRIVATE)
+                    .edit()
+                    .putInt(SHARED_PREF_USER_INFO_SCORE, score)
+                    .apply();
+            greetUser();
+        }
+    }
+
+    private void greetUser(){
+        String prefNomComplet = getSharedPreferences(SHARED_PREF_USER_INFO, MODE_PRIVATE)
+                .getString(SHARED_PREF_USER_INFO_NAME, null);
+        int prefScore = getSharedPreferences(SHARED_PREF_USER_INFO, MODE_PRIVATE)
+                .getInt(SHARED_PREF_USER_INFO_SCORE, -1);
+
+        if(prefNomComplet !=null){
+            if (prefScore != -1){
+                messageTextView.setText(getString(R.string.welcome_back_with_score, prefNomComplet, prefScore));
+            }else {
+                messageTextView.setText(getString(R.string.welcome_back, prefNomComplet));
+            }
+            inputNameEditText.setText(prefNomComplet);
+        }
     }
 }

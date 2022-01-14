@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +17,8 @@ import orange.odc.testapp.model.Question;
 import orange.odc.testapp.model.QuestionBank;
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener {
+    public static final String BUNDLE_EXTRA_SCORE = "BUNDLE_EXTRA_SCORE";
+
     private TextView questionTextview;
     private Button answerButton1;
     private Button answerButton2;
@@ -162,6 +165,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
+                        Intent intent = new Intent();
+                        intent.putExtra(BUNDLE_EXTRA_SCORE, score);
+                        setResult(RESULT_OK, intent);
                         finish();
                     }
                 })
